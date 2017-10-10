@@ -1,65 +1,96 @@
 package es.uvigo.esei.dai.hybridserver.http;
 
+import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
 
+import es.uvigo.esei.dai.hybridserver.http.HTTPParser;
+
 public class HTTPRequest {
+	private HTTPRequestMethod method;
+	private String[] resourcePath;
+	private String resourceChain;
+	private String httpVersion;
+	private Map<String, String> resourceParameters;
+	private Map<String, String> headerParameters;
+	private String resourceName;
+	private String content;
+	private int contentLength;
+
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
+
+		try (BufferedReader buffer = new BufferedReader(reader)) {
+			
+			//Parse first line and get its separate words
+			String line = buffer.readLine();
+			String[] components = line.split(" ");
+			
+			//Assign each word to its matching resource
+			this.method = HTTPParser.parseMethod(components[0]);
+			this.resourceChain = components[1];
+			this.resourceName = HTTPParser.parseResourceName(this.resourceChain);
+			this.resourcePath = HTTPParser.parseResourcePath(this.resourceChain);
+			this.httpVersion = components[2];
+			
+			while((line = buffer.readLine()) != ""){
+				
+			}
+								
+
+		}catch(IOException e){
+			throw new IOException(e.getMessage());
+		}
+
 	}
 
 	public HTTPRequestMethod getMethod() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.method;
 	}
 
 	public String getResourceChain() {
-		// TODO Auto-generated method stub
-		return null;
+		return resourceChain;
 	}
 
 	public String[] getResourcePath() {
-		// TODO Auto-generated method stub
-		return null;
+		return resourcePath;
 	}
 
 	public String getResourceName() {
-		// TODO Auto-generated method stub
-		return null;
+		return resourceName;
 	}
 
 	public Map<String, String> getResourceParameters() {
-		// TODO Auto-generated method stub
-		return null;
+		return resourceParameters;
 	}
 
 	public String getHttpVersion() {
-		// TODO Auto-generated method stub
-		return null;
+		return httpVersion;
 	}
 
 	public Map<String, String> getHeaderParameters() {
-		// TODO Auto-generated method stub
-		return null;
+		return headerParameters;
 	}
 
 	public String getContent() {
-		// TODO Auto-generated method stub
-		return null;
+		return content;
 	}
 
 	public int getContentLength() {
-		// TODO Auto-generated method stub
-		return -1;
+		return contentLength;
 	}
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder(this.getMethod().name()).append(' ').append(this.getResourceChain())
-				.append(' ').append(this.getHttpVersion()).append("\r\n");
+		final StringBuilder sb = new StringBuilder(this.getMethod().name())
+				.append(' ').append(this.getResourceChain()).append(' ')
+				.append(this.getHttpVersion()).append("\r\n");
 
-		for (Map.Entry<String, String> param : this.getHeaderParameters().entrySet()) {
-			sb.append(param.getKey()).append(": ").append(param.getValue()).append("\r\n");
+		for (Map.Entry<String, String> param : this.getHeaderParameters()
+				.entrySet()) {
+			sb.append(param.getKey()).append(": ").append(param.getValue())
+					.append("\r\n");
 		}
 
 		if (this.getContentLength() > 0) {
@@ -68,4 +99,5 @@ public class HTTPRequest {
 
 		return sb.toString();
 	}
+
 }
