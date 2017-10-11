@@ -23,39 +23,44 @@ public class HTTPRequest {
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
 
 		try (BufferedReader buffer = new BufferedReader(reader)) {
-			
-			//Parse first line and get method, chain and version
+
+			// Parse first line and get method, chain and version
 			String line = buffer.readLine();
 			String[] components = line.split(" ");
-			
+
 			this.method = HTTPParser.parseMethod(components[0]);
 			this.resourceChain = components[1];
-			this.resourceName = HTTPParser.parseResourceName(this.resourceChain);
-			this.resourcePath = HTTPParser.parseResourcePath(this.resourceChain);
+			this.resourceName = HTTPParser
+					.parseResourceName(this.resourceChain);
+			this.resourcePath = HTTPParser
+					.parseResourcePath(this.resourceChain);
 			this.httpVersion = components[2];
-			
-			//Parse header and get parameters
+
+			// Parse header and get parameters
 			Map<Integer, String> headerParams = new LinkedHashMap<Integer, String>();
 			int count = 0;
-			while(!(line = buffer.readLine()).isEmpty()){
+			while (!(line = buffer.readLine()).isEmpty()) {
 				headerParams.put(count, line);
 				count++;
 			}
-			this.headerParameters = HTTPParser.parseHeaderParameters(headerParams);	
-			this.contentLength = Integer.parseInt(headerParameters.get("Content-Length"));
-			
-			//Parse content
+			this.headerParameters = HTTPParser
+					.parseHeaderParameters(headerParams);
+			this.contentLength = HTTPParser
+					.parseContentLength(headerParameters);
+
+			// Parse content
 			Map<Integer, String> contentParams = new LinkedHashMap<Integer, String>();
 			count = 0;
-			while(!(line = buffer.readLine()).isEmpty()){
+
+			while ((line = buffer.readLine()) != null) {
 				contentParams.put(count, line);
 				count++;
 			}
-			//this.content = HTTPParser.parseContent(contentParams);
-			
-			//this.resourceParameters = HTTPParser.parseResourceParameters(this.resourceChain);					
+			this.content = HTTPParser.parseContent(contentParams);
+			this.resourceParameters = HTTPParser.parseResourceParameters(
+					this.resourceChain, this.content);
 
-		}catch(IOException e){
+		} catch (IOException e) {
 			throw new IOException(e.getMessage());
 		}
 

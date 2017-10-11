@@ -1,11 +1,11 @@
 package es.uvigo.esei.dai.hybridserver.http;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class HTTPParser {
+	public static final String CONTENT_LENGTH = "Content-Length";
 
 	public static HTTPRequestMethod parseMethod(String method) {
 		switch (method.toUpperCase()) {
@@ -56,19 +56,29 @@ public class HTTPParser {
 	}
 
 	public static Map<String, String> parseResourceParameters(
-			String resourceChain) {
+			String resourceChain, String content) {
 		Map<String, String> toret = new LinkedHashMap<String, String>();
-		
+
 		try {
 			String parameterChain[] = resourceChain.split(Pattern.quote("?"))[1]
 					.split(Pattern.quote("&"));
-			
+
 			for (String parameter : parameterChain) {
 				String[] aux = parameter.split("=");
 				toret.put(aux[0], aux[1]);
 			}
+
 		} catch (IndexOutOfBoundsException e) {
-			toret.clear();
+		}
+
+		try {
+			String contentChain[] = content.split(Pattern.quote("&"));
+
+			for (String cont : contentChain) {
+				String[] aux = cont.split("=");
+				toret.put(aux[0], aux[1]);
+			}
+		} catch (NullPointerException e) {
 		}
 
 		return toret;
@@ -85,17 +95,33 @@ public class HTTPParser {
 
 		return toret;
 	}
-	
-	public static Map<String, String> parseContent(Map<Integer, String> contentParams){
-			Map<String, String> toret = new LinkedHashMap<String, String>();
 
-			for (Map.Entry<Integer, String> parameter : contentParams.entrySet()) {
-				String[] aux = parameter.getValue().split("=");
-				toret.put(aux[0], aux[1]);
+	public static String parseContent(Map<Integer, String> contentParams) {
+		if (!contentParams.isEmpty()) {
+			String toret = "";
+
+			for (Map.Entry<Integer, String> parameter : contentParams
+					.entrySet()) {
+				String aux = parameter.getValue().toString();
+				toret = toret.concat(aux);
 			}
 
 			return toret;
-		
+		} else {
+			return null;
+		}
+
+	}
+
+	public static int parseContentLength(Map<String, String> headerParameters) {
+		if (headerParameters.containsKey(HTTPParser.CONTENT_LENGTH)) {
+			String strl = (String) headerParameters
+					.get(HTTPParser.CONTENT_LENGTH);
+			return Integer.parseInt(strl);
+		} else {
+			return 0;
+		}
+
 	}
 
 }
