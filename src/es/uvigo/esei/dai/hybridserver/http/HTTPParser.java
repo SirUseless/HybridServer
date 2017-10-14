@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 public class HTTPParser {
 	public static final String CONTENT_LENGTH = "Content-Length";
 
+	@Deprecated
 	public static HTTPRequestMethod parseMethod(String method) {
 		switch (method.toUpperCase()) {
 		case "HEAD":
@@ -38,6 +39,7 @@ public class HTTPParser {
 		}
 	}
 
+	@Deprecated
 	public static String parseResourceName(String resourceChain) {
 		return resourceChain.split(Pattern.quote("?"))[0].substring(1);
 

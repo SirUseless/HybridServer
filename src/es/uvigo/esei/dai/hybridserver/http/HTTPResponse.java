@@ -39,6 +39,7 @@ public class HTTPResponse {
 	}
 
 	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public Map<String, String> getParameters() {
@@ -78,17 +79,23 @@ public class HTTPResponse {
 		writer.write(this.status.getStatus() + "\r\n");
 
 		// Parameters
-		if(!this.parameters.equals(null)){
+		if (!this.parameters.equals(null)) {
 			for (Map.Entry<String, String> parameter : this.parameters
 					.entrySet()) {
 				writer.write(parameter.getKey() + ": " + parameter.getValue()
 						+ "\r\n");
 			}
+			if (this.content != null && !this.content.isEmpty()) {
+				writer.write(HTTPHeaders.CONTENT_LENGTH.getHeader() + ": "
+						+ content.length() + "\r\n");
+			}
 			writer.write("\r\n");
 		}
 
 		// Content
-		if(this.content != null) writer.write(this.content);
+		if (this.content != null && !this.content.isEmpty()) {
+			writer.write(this.content);
+		}
 	}
 
 	@Override
