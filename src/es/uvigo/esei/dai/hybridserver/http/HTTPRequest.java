@@ -9,79 +9,135 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import es.uvigo.esei.dai.hybridserver.http.HTTPParser;
-
 public class HTTPRequest {
 	private final String UTF8_ENCODING = "UTF-8";
 	private HTTPRequestMethod method;
 	private String[] resourcePath;
 	private String resourceChain;
 	private String httpVersion;
-	private Map<String, String> resourceParameters;
-	private Map<String, String> headerParameters;
+	private Map<String, String> resourceParameters = new LinkedHashMap<String, String>();
+	private Map<String, String> headerParameters = new LinkedHashMap<String, String>();
 	private String resourceName;
 	private String content;
 	private int contentLength;
 
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
 
-		try (BufferedReader buffer = new BufferedReader(reader)) {
+		try (BufferedReader buffer = new BufferedReader(reader);) {
+			String firstLine = buffer.readLine();
 
+			String[] components;
 			try {
-				// Parse first line and get method, chain and version
-				String firstLine = buffer.readLine();
-				String[] components = firstLine.split("\\s+");
-
-				this.method = HTTPRequestMethod.valueOf(components[0]);
-				this.resourceChain = components[1];
-				this.resourceName = this.resourceChain
-						.split(Pattern.quote("?"))[0].substring(1);
-				this.resourcePath = HTTPParser
-						.parseResourcePath(this.resourceChain);
-				this.httpVersion = components[2];
-
-				// Parse header and get parameters
-				Map<Integer, String> headerParams = new LinkedHashMap<Integer, String>();
-				int count = 0;
-				String headerLine = "";
-				// this.resourceParameters = new LinkedHashMap<>();
-				while (!(headerLine = buffer.readLine()).isEmpty()) {
-					// String[] aux = headerLine.split(": ");
-					// this.headerParameters.put(aux[0], aux[1]);
-					headerParams.put(count, headerLine);
-					count++;
-				}
-				this.headerParameters = HTTPParser
-						.parseHeaderParameters(headerParams);
-				this.contentLength = HTTPParser
-						.parseContentLength(headerParameters);
-
-				// Parse content
-				Map<Integer, String> contentParams = new LinkedHashMap<Integer, String>();
-				count = 0;
-
-				while ((firstLine = buffer.readLine()) != null) {
-					contentParams.put(count, firstLine);
-					count++;
-				}
-				this.content = HTTPParser.parseContent(contentParams);
-
-				String type = headerParameters.get(HTTPHeaders.CONTENT_TYPE
-						.getHeader());
-
-				if (type != null && type.startsWith(MIME.FORM.getMime())) {
-					this.content = URLDecoder.decode(this.content,
-							this.UTF8_ENCODING);
-				}
-
-				this.resourceParameters = HTTPParser.parseResourceParameters(
-						this.resourceChain, this.content);
+				components = firstLine.split("\\s+");
 			} catch (Exception e) {
-				throw new HTTPParseException("HTTP Request format error.");
+				throw new HTTPParseException("Missing first line");
 			}
 
+			try {
+				this.method = HTTPRequestMethod.valueOf(components[0]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new HTTPParseException("Missing method");
+			} catch (IllegalArgumentException e) {
+				throw new HTTPParseException("Invalid method");
+			}
+
+			try {
+				this.resourceChain = components[1];
+
+				if (this.resourceChain.contains("?")) {
+					this.resourceName = this.resourceChain.split(Pattern
+							.quote("?"))[0].substring(1);
+				} else {
+					this.resourceName = this.resourceChain.substring(1);
+				}
+
+				if (this.resourceName.contains("/")
+						|| !this.resourceName.isEmpty()) {
+					this.resourcePath = resourceName.split(Pattern.quote("/"));
+				} else {
+					this.resourcePath = new String[0];
+				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new HTTPParseException("Missing resource chain");
+			}
+
+			try {
+				this.httpVersion = components[2];
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new HTTPParseException("Missing version");
+			}
+
+			try {
+				String headerLine = "";
+				while (!(headerLine = buffer.readLine()).isEmpty()) {
+					String[] headerLineComponents = headerLine.split(": ");
+					this.headerParameters.put(headerLineComponents[0],
+							headerLineComponents[1]);
+				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new HTTPParseException("Invalid header");
+			}
+
+			if (this.headerParameters.containsKey(HTTPHeaders.CONTENT_LENGTH
+					.getHeader())) {
+				this.contentLength = Integer.parseInt(this.headerParameters
+						.get(HTTPHeaders.CONTENT_LENGTH.getHeader()));
+			} else {
+				this.contentLength = 0;
+			}
+
+			String contentLine = "";
+			this.content = "";
+			while ((contentLine = buffer.readLine()) != null) {
+				this.content = this.content.concat(contentLine);
+			}
+			if (this.content.isEmpty())
+				this.content = null;
+
+			// Simple way of taking Content-Length into account
+			if (this.content != null
+					&& this.content.length() > this.contentLength)
+				this.content = this.content.substring(0, contentLength);
+
+			String type = headerParameters.get(HTTPHeaders.CONTENT_TYPE
+					.getHeader());
+
+			if (type != null && type.startsWith(MIME.FORM.getMime())) {
+				this.content = URLDecoder.decode(this.content,
+						this.UTF8_ENCODING);
+			}
+
+			if (this.resourceChain.contains("?")) {
+				String[] aux = this.resourceChain.split(Pattern.quote("?"));
+
+				if (aux[1].contains("&")) {
+					for (String resChainElement : aux[1].split(Pattern
+							.quote("&"))) {
+						String[] resChainParams = resChainElement.split("=");
+						this.resourceParameters.put(resChainParams[0],
+								resChainParams[1]);
+					}
+				} else {
+					String[] resChainParams = aux[1].split("=");
+					this.resourceParameters.put(resChainParams[0],
+							resChainParams[1]);
+				}
+			}
+
+			if (this.content != null && this.content.contains("&")) {
+				String[] contentElements = this.content.split(Pattern
+						.quote("&"));
+				for (String contentParams : contentElements) {
+					String[] contentParam = contentParams.split("=");
+					this.resourceParameters.put(contentParam[0],
+							contentParam[1]);
+				}
+			} else if (this.content != null) {
+				String[] contentParam = content.split("=");
+				this.resourceParameters.put(contentParam[0], contentParam[1]);
+			}
 		} catch (IOException e) {
-			throw e;
+			throw new HTTPParseException("Invalid header");
 		}
 
 	}

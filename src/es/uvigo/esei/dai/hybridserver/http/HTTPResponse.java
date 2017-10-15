@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,13 +62,7 @@ public class HTTPResponse {
 	}
 
 	public List<String> listParameters() {
-		List<String> list = new LinkedList<String>();
-
-		for (Map.Entry<String, String> parameter : this.parameters.entrySet()) {
-			list.add(parameter.getKey().toString());
-		}
-
-		return list;
+		return (List<String>) this.parameters.values();
 	}
 
 	public void print(Writer writer) throws IOException {
