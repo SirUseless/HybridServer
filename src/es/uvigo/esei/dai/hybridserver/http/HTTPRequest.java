@@ -23,7 +23,7 @@ public class HTTPRequest {
 
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
 
-		try (BufferedReader buffer = new BufferedReader(reader);) {
+		try (BufferedReader buffer = new BufferedReader(reader)) {
 			String firstLine = buffer.readLine();
 
 			String[] components;
@@ -137,7 +137,7 @@ public class HTTPRequest {
 				this.resourceParameters.put(contentParam[0], contentParam[1]);
 			}
 		} catch (IOException e) {
-			throw new HTTPParseException("Invalid header");
+			System.out.println("M'ha petao el reader");
 		}
 
 	}
