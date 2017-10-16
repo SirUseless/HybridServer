@@ -23,17 +23,19 @@ public class ServiceThread implements Runnable {
 
 	@Override
 	public void run() {
-//		this.parseRequest();
-//		if(this.request != null){
-//			this.testHomepage();
-//		}else{
-//			this.sendServerError();
-//		}
-		
-		this.testHomepage();
-
+		try(BufferedReader buffer = new BufferedReader(new InputStreamReader(socket.getInputStream()))){
+			try {
+				this.request = new HTTPRequest(buffer);
+				System.out.println(this.request.toString());
+			} catch (HTTPParseException e) {
+				System.out.println("parse exception: " + e.getMessage());
+			}
+			this.testHomepage();
+		}catch(IOException e){
+			System.err.println(e.getMessage());
+		}
 	}
-	
+	@SuppressWarnings("unused")
 	private void parseRequest(){
 		try(Socket socket = this.socket){
 			BufferedReader buffer;
@@ -54,7 +56,6 @@ public class ServiceThread implements Runnable {
 	}
 
 	private void testHomepage() {
-		System.out.println("Homepage test method");
 		try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())) ) {
 			
 			HTTPResponse response = new HTTPResponse();
@@ -66,12 +67,12 @@ public class ServiceThread implements Runnable {
 		} catch (IOException e) {
 			System.out.println("Could not write to socket: " + e.getMessage());
 		}
-		System.out.println("Homepage test method: terminated succesfully");
 	}
 	
 	private void sendServerError(){
 		System.err.println("Reporting server error to client");
-		try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())) ) {
+		try {
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			
 			HTTPResponse response = new HTTPResponse();
 			response.setVersion(HTTPHeaders.HTTP_1_1.getHeader());

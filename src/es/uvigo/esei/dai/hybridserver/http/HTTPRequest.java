@@ -23,7 +23,8 @@ public class HTTPRequest {
 
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
 
-		try (BufferedReader buffer = new BufferedReader(reader)) {
+		try {
+			BufferedReader buffer = new BufferedReader(reader);
 			String firstLine = buffer.readLine();
 
 			String[] components;
@@ -86,25 +87,27 @@ public class HTTPRequest {
 				this.contentLength = 0;
 			}
 
-			String contentLine = "";
-			this.content = "";
-			while ((contentLine = buffer.readLine()) != null) {
-				this.content = this.content.concat(contentLine);
-			}
-			if (this.content.isEmpty())
+			//Read $contentLength characters from request
+			if (this.contentLength != 0) {
+				this.content = "";
+				char[] contentchar = new char[contentLength];
+				buffer.read(contentchar, 0, contentLength);
+				
+				for (int i = 0; i < contentchar.length; i++) {
+						content += contentchar[i];
+				}
+				
+				
+				//Decoding encoded content
+				String type = headerParameters.get(HTTPHeaders.CONTENT_TYPE
+						.getHeader());
+
+				if (type != null && type.startsWith(MIME.FORM.getMime())) {
+					this.content = URLDecoder.decode(this.content,
+							this.UTF8_ENCODING);
+				}
+			}else{
 				this.content = null;
-
-			// Simple way of taking Content-Length into account
-			if (this.content != null
-					&& this.content.length() > this.contentLength)
-				this.content = this.content.substring(0, contentLength);
-
-			String type = headerParameters.get(HTTPHeaders.CONTENT_TYPE
-					.getHeader());
-
-			if (type != null && type.startsWith(MIME.FORM.getMime())) {
-				this.content = URLDecoder.decode(this.content,
-						this.UTF8_ENCODING);
 			}
 
 			if (this.resourceChain.contains("?")) {
@@ -113,7 +116,8 @@ public class HTTPRequest {
 				if (aux[1].contains("&")) {
 					for (String resChainElement : aux[1].split(Pattern
 							.quote("&"))) {
-						String[] resChainParams = resChainElement.split("=");
+						String[] resChainParams = resChainElement
+								.split("=");
 						this.resourceParameters.put(resChainParams[0],
 								resChainParams[1]);
 					}
@@ -124,7 +128,7 @@ public class HTTPRequest {
 				}
 			}
 
-			if (this.content != null && this.content.contains("&")) {
+			if (this.content != null && this.content.contains("&") && this.content.contains("=")) {
 				String[] contentElements = this.content.split(Pattern
 						.quote("&"));
 				for (String contentParams : contentElements) {
@@ -132,10 +136,13 @@ public class HTTPRequest {
 					this.resourceParameters.put(contentParam[0],
 							contentParam[1]);
 				}
-			} else if (this.content != null) {
+			} else if (this.content != null && this.content.contains("=")) {
 				String[] contentParam = content.split("=");
-				this.resourceParameters.put(contentParam[0], contentParam[1]);
+				this.resourceParameters.put(contentParam[0],
+						contentParam[1]);
 			}
+			
+
 		} catch (IOException e) {
 			System.out.println("M'ha petao el reader");
 		}
