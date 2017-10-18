@@ -19,6 +19,8 @@ public class Launcher {
 				}catch(IOException e){
 					System.err.println("Could not create server from config file: " + e.getMessage());
 				}
+			}else{
+				System.err.println("Provided argument is not a .conf file.");
 			}
 		}else{
 			System.out.println("No config file provided, starting server with default config.");

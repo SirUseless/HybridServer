@@ -13,9 +13,15 @@ import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponse;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponseStatus;
 
+/**
+ * 
+ * @author Adrián Simón Reboredo & Josué Pato Valcárcel
+ *
+ */
 public class ServiceThread implements Runnable {
 	private Socket socket = null;
 	private HTTPRequest request;
+	private HTTPResponse response;
 
 	public ServiceThread(Socket socket) {
 		this.socket = socket;
@@ -23,32 +29,58 @@ public class ServiceThread implements Runnable {
 
 	@Override
 	public void run() {
-		try(BufferedReader buffer = new BufferedReader(new InputStreamReader(socket.getInputStream()))){
+		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(
+				socket.getInputStream()))) {
 			try {
 				this.request = new HTTPRequest(buffer);
-				System.out.println(this.request.toString());
+				switch (this.request.getMethod()) {
+				case GET:
+					this.prepareGet();
+					break;
+				case POST:
+					this.preparePost();
+					break;
+				case DELETE:
+					this.prepareDelete();
+					break;
+				default:
+					this.prepareUnsupported();
+					break;
+				}
+				this.respond();
 			} catch (HTTPParseException e) {
 				System.out.println("Parse exception: " + e.getMessage());
 			}
-			this.testHomepage();
-		}catch(IOException e){
+		} catch (IOException e) {
 			System.err.println(e.getMessage());
 		}
 	}
 
-	private void testHomepage() {
-		try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())) ) {
-			
-			HTTPResponse response = new HTTPResponse();
-			response.setVersion(HTTPHeaders.HTTP_1_1.getHeader());
-			response.setStatus(HTTPResponseStatus.S200);
-			response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), "text/html");
-			response.setContent("<html><h1>Hybrid Server</h1></html>");
+	private void respond() {
+		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+				socket.getOutputStream()))) {
 			response.print(writer);
 		} catch (IOException e) {
 			System.out.println("Could not write to socket: " + e.getMessage());
 		}
 	}
-	
+
+	private void prepareGet() {
+
+	}
+
+	private void preparePost() {
+
+	}
+
+	private void prepareDelete() {
+
+	}
+
+	private void prepareUnsupported() {
+			this.response = new HTTPResponse();
+			response.setVersion(HTTPHeaders.HTTP_1_1.getHeader());
+			response.setStatus(HTTPResponseStatus.S405);
+	}
 
 }

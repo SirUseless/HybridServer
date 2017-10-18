@@ -12,8 +12,40 @@ import java.sql.SQLException;
  */
 
 public class MySQLConnection {
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+
+	public String getDb_url() {
+		return db_url;
+	}
+
+	public void setDb_url(String db_url) {
+		this.db_url = db_url;
+	}
+
+	public String getDb_user() {
+		return db_user;
+	}
+
+	public void setDb_user(String db_user) {
+		this.db_user = db_user;
+	}
+
+	public String getDb_passwd() {
+		return db_passwd;
+	}
+
+	public void setDb_passwd(String db_passwd) {
+		this.db_passwd = db_passwd;
+	}
+
 	protected Connection connection;
-	
+	//TODO setup jdbc driver
 	private final String JDBC_DRIVER = "";
 	
 	private String db_url;

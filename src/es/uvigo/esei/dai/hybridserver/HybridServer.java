@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import es.uvigo.esei.dai.hybridserver.dao.HtmlDAOMap;
+import es.uvigo.esei.dai.hybridserver.dao.IDBConnection;
 import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 
 
@@ -18,14 +19,12 @@ public class HybridServer {
 	private static final int DEFAULT_MAX_SERVICES = 50;
 	private static int servicePort;
 	private static IDocumentDAO documentDAO;
+	private static IDBConnection dbConnection;
 	private Thread serverThread;
 	private boolean stop;
 	private int maxServices;
-	@SuppressWarnings("unused")
 	private String db_url;
-	@SuppressWarnings("unused")
 	private String db_user;
-	@SuppressWarnings("unused")
 	private String db_password;
 
 	public HybridServer() {
@@ -48,11 +47,11 @@ public class HybridServer {
 	}
 
 	public HybridServer(Properties properties) {
-		this.maxServices = Integer.parseInt(properties.getProperty("numClients").toString());
-		servicePort = Integer.parseInt(properties.getProperty("port"));
-		this.db_url = properties.getProperty("db.url");
-		this.db_user = properties.getProperty("db.user");
-		this.db_password = properties.getProperty("db.password");
+		this.maxServices = Integer.parseInt(properties.getProperty(PropertyNames.CLIENT_NUMBER.getName()).toString());
+		servicePort = Integer.parseInt(properties.getProperty(PropertyNames.PORT.getName()));
+		this.db_url = properties.getProperty(PropertyNames.DB_URL.getName());
+		this.db_user = properties.getProperty(PropertyNames.DB_USER.getName());
+		this.db_password = properties.getProperty(PropertyNames.DB_PASSWORD.getName());
 		
 		System.out.println("Server launched from config file.");
 	}
