@@ -6,7 +6,7 @@ import java.util.UUID;
 public class HtmlDAODB implements IDocumentDAO{
 
 	@Override
-	public UUID create(String doc) throws Exception {
+	public String create(String doc) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -24,7 +24,7 @@ public class HtmlDAODB implements IDocumentDAO{
 	}
 
 	@Override
-	public void update(UUID uuid, String content) throws Exception {
+	public void update(String uuid, String content) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}
@@ -40,6 +40,7 @@ public class HtmlDAODB implements IDocumentDAO{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 
 }

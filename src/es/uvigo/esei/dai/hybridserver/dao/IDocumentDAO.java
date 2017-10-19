@@ -13,10 +13,10 @@ public interface IDocumentDAO {
 	/**
 	 * 
 	 * @param doc string containing the document data
-	 * @return UUID object of the random UUID assigned to the document
+	 * @return UUID random UUID assigned to the document
 	 * @throws Exception if there is an insertion problem
 	 */
-	public UUID create(String doc) throws Exception;
+	public String create(String doc) throws Exception;
 	/**
 	 * 
 	 * @param uuid pre-assigned uuid 
@@ -25,7 +25,7 @@ public interface IDocumentDAO {
 	 */
 	public void rawCreate(String uuid, String doc) throws Exception;
 	public String read(String uuid) throws Exception;
-	public void update(UUID uuid, String content) throws Exception;
+	public void update(String uuid, String content) throws Exception;
 	/**
 	 * @param uuid uuid of document to be deleted
 	 * @return true if deleted || false if already non existent in persistent data

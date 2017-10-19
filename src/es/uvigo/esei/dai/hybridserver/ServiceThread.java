@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Map;
+import java.util.UUID;
 
 import es.uvigo.esei.dai.hybridserver.http.HTTPHeaders;
 import es.uvigo.esei.dai.hybridserver.http.HTTPParseException;
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponse;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponseStatus;
+import es.uvigo.esei.dai.hybridserver.http.MIME;
 
 /**
  * 
@@ -25,6 +28,9 @@ public class ServiceThread implements Runnable {
 
 	public ServiceThread(Socket socket) {
 		this.socket = socket;
+		this.response = new HTTPResponse();
+		this.response.setVersion(HTTPHeaders.HTTP_1_1.getHeader());
+		this.response.setStatus(HTTPResponseStatus.S500);
 	}
 
 	@Override
@@ -44,7 +50,8 @@ public class ServiceThread implements Runnable {
 					this.prepareDelete();
 					break;
 				default:
-					this.prepareUnsupported();
+					//Return unsupported method status
+					response.setStatus(HTTPResponseStatus.S405);
 					break;
 				}
 				this.respond();
@@ -66,21 +73,85 @@ public class ServiceThread implements Runnable {
 	}
 
 	private void prepareGet() {
-
+		Map<String, String> resources = this.request.getResourceParameters();
+		if(resources.isEmpty()){
+			this.renderHomepage();
+		}else{
+			this.renderDocument();
+		}
 	}
 
 	private void preparePost() {
-
+		Map<String, String> resources = this.request.getResourceParameters();
+		if(resources.isEmpty() || !resources.containsKey("uuid")){
+			this.response.setStatus(HTTPResponseStatus.S400);
+		}else{
+			//this.renderDocument();
+		}
 	}
 
 	private void prepareDelete() {
-
+		Map<String, String> resources = this.request.getResourceParameters();
+		
+		if(!resources.isEmpty()){
+			String uuid = this.request.getResourceParameters().get("uuid");
+			this.delete(uuid);
+		}
 	}
-
-	private void prepareUnsupported() {
-			this.response = new HTTPResponse();
-			response.setVersion(HTTPHeaders.HTTP_1_1.getHeader());
-			response.setStatus(HTTPResponseStatus.S405);
+	
+	
+	/* VIEWS */
+	/**
+	 * Creates the html view of the main page/file list
+	 */
+	private void renderHomepage(){
+		this.response.setStatus(HTTPResponseStatus.S200);
+		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
+		String content = "<html><h1>Hybrid Server</h1><h2>Adrian Simon Reboredo</h2><h2>Josue Pato Valcarcel</h2></br>";
+		
+		content = content.concat("<ul>");
+		
+		try {
+			Map<UUID,String> db = HybridServer.documentDAO.list();
+			for (Map.Entry<UUID,String>  row : db.entrySet()) {
+				content = content.concat("<li>");
+				content = content.concat("<a href='" + this.request.getResourceName() + "?uuid=" + row.getKey().toString() + "'>");
+				content = content.concat(row.getKey().toString());
+				content = content.concat("</a></li>");
+			}
+		} catch (Exception e) {
+			System.out.println("Exception");
+		}		
+		content = content.concat("</ul>");
+		content = content.concat("</html>");
+		
+		this.response.setContent(content);
+	}
+	
+	/**
+	 * Creates the html view of any individual document
+	 */
+	private void renderDocument(){
+		this.response.setStatus(HTTPResponseStatus.S200);
+		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
+		String uuid = this.request.getResourceParameters().get("uuid");
+		try {
+			this.response.setContent(HybridServer.documentDAO.read(uuid));
+		} catch (Exception e) {
+			System.err.println("Exception");
+		}
+	}
+	
+	
+	/* ACTIONS */
+	
+	private void delete(String uuid){
+		try {
+			HybridServer.documentDAO.delete(uuid);
+			this.response.setStatus(HTTPResponseStatus.S200);
+		} catch (Exception e) {
+			
+		}
 	}
 
 }

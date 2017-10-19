@@ -18,26 +18,26 @@ public class HtmlDAOMap implements IDocumentDAO{
 	}
 	
 	@Override
-	public UUID create(String doc){
-		UUID uuid = UUID.randomUUID();
-		this.htmlMappedDB.put(uuid, doc);
+	public String create(String doc){
+		String uuid = UUID.randomUUID().toString();
+		this.htmlMappedDB.put(UUID.fromString(uuid), doc);
 				
 		return uuid;
 	}
 
 	@Override
 	public String read(String uuid){
-		if(this.htmlMappedDB.containsKey(uuid)){
-			return this.htmlMappedDB.get(uuid);
+		if(this.htmlMappedDB.containsKey(UUID.fromString(uuid))){
+			return this.htmlMappedDB.get(UUID.fromString(uuid));
 		}else{
 			return null;
 		}
 	}
 
 	@Override
-	public void update(UUID uuid, String doc) throws Exception{
-		if(this.htmlMappedDB.containsKey(uuid)){
-			this.htmlMappedDB.replace(uuid, doc);
+	public void update(String uuid, String doc) throws Exception{
+		if(this.htmlMappedDB.containsKey(UUID.fromString(uuid))){
+			this.htmlMappedDB.replace(UUID.fromString(uuid), doc);
 		}else{
 			throw new Exception("Element does not exist.");
 		}
@@ -46,8 +46,8 @@ public class HtmlDAOMap implements IDocumentDAO{
 
 	@Override
 	public boolean delete(String uuid){
-		if(this.htmlMappedDB.containsKey(uuid)){
-			this.htmlMappedDB.remove(uuid);
+		if(this.htmlMappedDB.containsKey(UUID.fromString(uuid))){
+			this.htmlMappedDB.remove(UUID.fromString(uuid));
 			return true;
 		}else{
 			return false;
@@ -61,7 +61,7 @@ public class HtmlDAOMap implements IDocumentDAO{
 
 	@Override
 	public void rawCreate(String uuid, String doc) throws Exception {
-		if(!this.htmlMappedDB.containsKey(uuid)){
+		if(!this.htmlMappedDB.containsKey(UUID.fromString(uuid))){
 			this.htmlMappedDB.put(UUID.fromString(uuid), doc);
 		}else{
 			throw new Exception("Duplicate key");
