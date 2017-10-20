@@ -8,8 +8,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import es.uvigo.esei.dai.hybridserver.dao.HtmlDAODB;
 import es.uvigo.esei.dai.hybridserver.dao.HtmlDAOMap;
-import es.uvigo.esei.dai.hybridserver.dao.IDBConnection;
 import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 
 
@@ -18,8 +18,8 @@ public class HybridServer {
 	private static final int DEFAULT_SERVICE_PORT = 8888;
 	private static final int DEFAULT_MAX_SERVICES = 50;
 	private static int servicePort;
+	//TODO non-static access to DAO
 	protected static IDocumentDAO documentDAO;
-	private static IDBConnection dbConnection;
 	private Thread serverThread;
 	private boolean stop;
 	private int maxServices;
@@ -75,6 +75,13 @@ public class HybridServer {
 		this.db_url = properties.getProperty(PropertyNames.DB_URL.getName());
 		this.db_user = properties.getProperty(PropertyNames.DB_USER.getName());
 		this.db_password = properties.getProperty(PropertyNames.DB_PASSWORD.getName());
+		
+		try {
+			documentDAO = new HtmlDAODB(this.db_url, this.db_user, this.db_password);
+		} catch (ClassNotFoundException e) {
+			System.err.println("Could not find DB Driver. Exiting");
+			System.exit(-1);
+		}
 		
 		System.out.println("Server launched from config file.");
 	}

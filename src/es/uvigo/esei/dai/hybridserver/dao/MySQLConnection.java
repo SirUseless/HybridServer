@@ -8,54 +8,57 @@ import java.sql.SQLException;
  * 
  * @author Adrián Simón Reboredo & Josué Pato Valcárcel
  *
- * Class defining an object wich represents a MySQL Connection
+ * Class defining an object which represents a MySQL Connection
  */
 
-public class MySQLConnection {
-	public Connection getConnection() {
-		return connection;
-	}
-
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-	}
-
-	public String getDb_url() {
-		return db_url;
-	}
-
-	public void setDb_url(String db_url) {
-		this.db_url = db_url;
-	}
-
-	public String getDb_user() {
-		return db_user;
-	}
-
-	public void setDb_user(String db_user) {
-		this.db_user = db_user;
-	}
-
-	public String getDb_passwd() {
-		return db_passwd;
-	}
-
-	public void setDb_passwd(String db_passwd) {
-		this.db_passwd = db_passwd;
-	}
-
-	protected Connection connection;
-	//TODO setup jdbc driver
-	private final String JDBC_DRIVER = "";
+//TODO use connection pooling instead of opening/closing a connection every time (open/close > realOpen/realClose)
+public class MySQLConnection implements AutoCloseable, IDBConnection {
+	private Connection connection;
+	private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	
 	private String db_url;
 	private String db_user;
 	private String db_passwd;
 	
-	public void connect() throws SQLException {
+	public MySQLConnection() throws ClassNotFoundException {
+		this.loadDriver();
+	}
+	
+	private void loadDriver() throws ClassNotFoundException {
+		Class.forName(JDBC_DRIVER);
+	}
+
+	public String getURL() {
+		return db_url;
+	}
+
+	public void setURL(String db_url) {
+		this.db_url = db_url;
+	}
+
+	public String getUser() {
+		return db_user;
+	}
+
+	public void setUser(String db_user) {
+		this.db_user = db_user;
+	}
+
+	public String getPassword() {
+		return db_passwd;
+	}
+
+	public void setPassword(String db_passwd) {
+		this.db_passwd = db_passwd;
+	}
+
+	
+	
+	public Connection connect() throws SQLException {
 		try{
 			connection = DriverManager.getConnection(db_url,db_user,db_passwd);
-			//Class.forName(JDBC_DRIVER);
+			System.out.println("Connection...");
+			return this.connection;
 		}catch(SQLException e){
 			throw e;
 		}
@@ -64,10 +67,9 @@ public class MySQLConnection {
 	public void close() throws SQLException {
 		if(this.connection != null){
 			if(!this.connection.isClosed()){
+				System.out.println("Closing connection...");
 				connection.close();
 			}
 		}
 	}
-	
-	//TODO getters and setters
 }

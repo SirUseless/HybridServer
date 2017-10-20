@@ -68,6 +68,11 @@ public class HtmlDAOMap implements IDocumentDAO{
 		}
 	}
 
+	@Override
+	public boolean isAvaliable() {
+		return true;
+	}
+
 
 
 }

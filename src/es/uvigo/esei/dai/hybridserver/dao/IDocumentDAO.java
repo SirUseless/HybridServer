@@ -33,4 +33,5 @@ public interface IDocumentDAO {
 	 */
 	public boolean delete(String uuid) throws Exception;
 	public Map<UUID, String> list() throws Exception;
+	public boolean isAvaliable();
 }

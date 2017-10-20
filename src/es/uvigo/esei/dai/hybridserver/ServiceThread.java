@@ -86,7 +86,7 @@ public class ServiceThread implements Runnable {
 
 	private void preparePost() {
 		Map<String, String> resources = this.request.getResourceParameters();
-		
+		System.out.println(HybridServer.documentDAO.isAvaliable());
 		//TODO Entrega 2: take file type into account for different doctypes
 		if(resources.containsKey("html")){
 			try {
@@ -95,6 +95,8 @@ public class ServiceThread implements Runnable {
 				//OK
 				this.response.setStatus(HTTPResponseStatus.S200);
 			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println( e.getMessage());
 				//Default response is already S500
 			}
 		}else{
@@ -120,9 +122,14 @@ public class ServiceThread implements Runnable {
 	private void renderHomepage(){
 		this.response.setStatus(HTTPResponseStatus.S200);
 		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
-		String content = "<html><h1>Hybrid Server</h1><h2>Adrian Simon Reboredo</h2><h2>Josue Pato Valcarcel</h2></br>";
-		
-		content = content.concat("<ul>");
+		String content = "<html><h1>Hybrid Server</h1><h2>Adrian Simon Reboredo</h2><h2>Josue Pato Valcarcel</h2>";
+		content = content.concat("<h3>Database Connection Status:&nbsp;");
+		if(HybridServer.documentDAO.isAvaliable()){
+			content = content.concat("<span style=\"color: green;\">CONNECTED</span>");
+		}else{
+			content = content.concat("<span style=\"color: red;\">NOT CONNECTED</span>");
+		}
+		content = content.concat("</h3><ul>");
 		
 		try {
 			Map<UUID,String> db = HybridServer.documentDAO.list();
@@ -133,7 +140,7 @@ public class ServiceThread implements Runnable {
 				content = content.concat("</a></li>");
 			}
 		} catch (Exception e) {
-			System.out.println("Exception");
+			System.out.println("Exception: " + e.getMessage());
 		}		
 		content = content.concat("</ul>");
 		content = content.concat("</html>");
