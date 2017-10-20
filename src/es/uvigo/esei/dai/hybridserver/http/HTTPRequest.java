@@ -123,8 +123,12 @@ public class HTTPRequest {
 					}
 				} else {
 					String[] resChainParams = aux[1].split("=");
-					this.resourceParameters.put(resChainParams[0],
-							resChainParams[1]);
+					try{
+						this.resourceParameters.put(resChainParams[0],
+								resChainParams[1]);
+					}catch(Exception e){
+						throw new HTTPParseException("Malformed resource");
+					}
 				}
 			}
 

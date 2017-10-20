@@ -30,6 +30,7 @@ public class ServiceThread implements Runnable {
 		this.socket = socket;
 		this.response = new HTTPResponse();
 		this.response.setVersion(HTTPHeaders.HTTP_1_1.getHeader());
+		//Default: internal server error
 		this.response.setStatus(HTTPResponseStatus.S500);
 	}
 
@@ -50,13 +51,15 @@ public class ServiceThread implements Runnable {
 					this.prepareDelete();
 					break;
 				default:
-					//Return unsupported method status
+					//Unsupported
 					response.setStatus(HTTPResponseStatus.S405);
 					break;
 				}
-				this.respond();
 			} catch (HTTPParseException e) {
-				System.out.println("Parse exception: " + e.getMessage());
+				//Bad request
+				this.response.setStatus(HTTPResponseStatus.S400);
+			} finally{
+				this.respond();
 			}
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
@@ -68,7 +71,7 @@ public class ServiceThread implements Runnable {
 				socket.getOutputStream()))) {
 			response.print(writer);
 		} catch (IOException e) {
-			System.out.println("Could not write to socket: " + e.getMessage());
+			System.err.println("Could not write to socket: " + e.getMessage());
 		}
 	}
 
@@ -83,10 +86,20 @@ public class ServiceThread implements Runnable {
 
 	private void preparePost() {
 		Map<String, String> resources = this.request.getResourceParameters();
-		if(resources.isEmpty() || !resources.containsKey("uuid")){
-			this.response.setStatus(HTTPResponseStatus.S400);
+		
+		//TODO Entrega 2: take file type into account for different doctypes
+		if(resources.containsKey("html")){
+			try {
+				String uuid = HybridServer.documentDAO.create(resources.get("html"));
+				this.response.setContent("<a href=\"html?uuid=" + uuid + "\">" + uuid + "</a>");
+				//OK
+				this.response.setStatus(HTTPResponseStatus.S200);
+			} catch (Exception e) {
+				//Default response is already S500
+			}
 		}else{
-			//this.renderDocument();
+			//Bad request
+			this.response.setStatus(HTTPResponseStatus.S400);
 		}
 	}
 
@@ -115,7 +128,7 @@ public class ServiceThread implements Runnable {
 			Map<UUID,String> db = HybridServer.documentDAO.list();
 			for (Map.Entry<UUID,String>  row : db.entrySet()) {
 				content = content.concat("<li>");
-				content = content.concat("<a href='" + this.request.getResourceName() + "?uuid=" + row.getKey().toString() + "'>");
+				content = content.concat("<a href=\"" + this.request.getResourceName() + "?uuid=" + row.getKey().toString() + "\">");
 				content = content.concat(row.getKey().toString());
 				content = content.concat("</a></li>");
 			}
@@ -132,6 +145,7 @@ public class ServiceThread implements Runnable {
 	 * Creates the html view of any individual document
 	 */
 	private void renderDocument(){
+		//TODO Entrega 2: switch documentt tyoe
 		this.response.setStatus(HTTPResponseStatus.S200);
 		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
 		String uuid = this.request.getResourceParameters().get("uuid");
@@ -140,13 +154,13 @@ public class ServiceThread implements Runnable {
 		try {
 			if(HybridServer.documentDAO.read(uuid) != null){
 				this.response.setContent(HybridServer.documentDAO.read(uuid));
+				this.response.setStatus(HTTPResponseStatus.S200);
 			}else{
 				this.response.setStatus(HTTPResponseStatus.S404);
 			}			
 		} catch (Exception e) {
-			System.out.println("Cant read");
+			this.response.setStatus(HTTPResponseStatus.S400);
 		}
-		
 	}
 	
 	
@@ -154,10 +168,14 @@ public class ServiceThread implements Runnable {
 	
 	private void delete(String uuid){
 		try {
-			HybridServer.documentDAO.delete(uuid);
-			this.response.setStatus(HTTPResponseStatus.S200);
+			if(HybridServer.documentDAO.delete(uuid)){
+				this.response.setStatus(HTTPResponseStatus.S200);
+			}else{
+				this.response.setStatus(HTTPResponseStatus.S404);
+			}
 		} catch (Exception e) {
-			
+			this.response.setStatus(HTTPResponseStatus.S400);
+			System.out.println("Delete failed");
 		}
 	}
 
