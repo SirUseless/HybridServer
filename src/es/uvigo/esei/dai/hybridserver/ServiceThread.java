@@ -135,11 +135,18 @@ public class ServiceThread implements Runnable {
 		this.response.setStatus(HTTPResponseStatus.S200);
 		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
 		String uuid = this.request.getResourceParameters().get("uuid");
+		
+
 		try {
-			this.response.setContent(HybridServer.documentDAO.read(uuid));
+			if(HybridServer.documentDAO.read(uuid) != null){
+				this.response.setContent(HybridServer.documentDAO.read(uuid));
+			}else{
+				this.response.setStatus(HTTPResponseStatus.S404);
+			}			
 		} catch (Exception e) {
-			System.err.println("Exception");
+			System.out.println("Cant read");
 		}
+		
 	}
 	
 	
