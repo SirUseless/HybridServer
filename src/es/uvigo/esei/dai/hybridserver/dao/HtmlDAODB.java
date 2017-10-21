@@ -5,13 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class HtmlDAODB implements IDocumentDAO {
 	private IDBConnection connection;
 	private String query;
-	private ResultSet result;
 
 	public HtmlDAODB(String url, String user, String password)
 		throws ClassNotFoundException {
@@ -34,7 +34,6 @@ public class HtmlDAODB implements IDocumentDAO {
 	public void rawCreate(String uuid, String doc) throws Exception {
 		this.query = "INSERT INTO html (uuid, content) VALUES (?, ?)";
 		try(Connection connectionInstance = this.connection.connect()){
-			System.out.println(connectionInstance.getSchema());
 			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query, Statement.RETURN_GENERATED_KEYS)){
 				stmt.setString(1, uuid);
 				stmt.setString(2, doc);
@@ -49,7 +48,18 @@ public class HtmlDAODB implements IDocumentDAO {
 
 	@Override
 	public String read(String uuid) throws Exception {
-		// TODO Auto-generated method stub
+		this.query = "SELECT * FROM html WHERE uuid = ?";
+		try(Connection connectionInstance = this.connection.connect()){
+			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
+				stmt.setString(1, uuid);
+				
+				try(ResultSet result = stmt.executeQuery()){
+					while (result.next()) {
+						return result.getString("content");
+					}
+				}
+			}
+		}
 		return null;
 	}
 
@@ -61,14 +71,35 @@ public class HtmlDAODB implements IDocumentDAO {
 
 	@Override
 	public boolean delete(String uuid) throws Exception {
-		// TODO Auto-generated method stub
+		this.query = "DELETE FROM html WHERE uuid = ?";
+		try(Connection connectionInstance = this.connection.connect()){
+			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
+				stmt.setString(1, uuid);
+				int result = stmt.executeUpdate();
+				
+				if(result == 1){
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public Map<UUID, String> list() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Map<UUID, String> toRet = new LinkedHashMap<UUID, String>();
+		this.query = "SELECT * FROM html";
+		try(Connection connectionInstance = this.connection.connect()){
+			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
+				
+				try(ResultSet result = stmt.executeQuery()){
+					while (result.next()) {
+						toRet.put(UUID.fromString(result.getString("uuid")), result.getString("content"));
+					}
+				}
+			}
+		}
+		return toRet;
 	}
 
 	@Override
