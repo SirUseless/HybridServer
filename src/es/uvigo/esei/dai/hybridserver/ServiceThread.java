@@ -157,8 +157,12 @@ public class ServiceThread implements Runnable {
 		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
 		String uuid = this.request.getResourceParameters().get("uuid");
 		
-
-		try {
+		
+		
+		try{
+			//Test if uuid is valid; should throw an exception if not
+			UUID.fromString(uuid);
+			
 			if(HybridServer.documentDAO.read(uuid) != null){
 				this.response.setContent(HybridServer.documentDAO.read(uuid));
 				this.response.setStatus(HTTPResponseStatus.S200);

@@ -57,7 +57,6 @@ public class MySQLConnection implements AutoCloseable, IDBConnection {
 	public Connection connect() throws SQLException {
 		try{
 			connection = DriverManager.getConnection(db_url,db_user,db_passwd);
-			System.out.println("Connection...");
 			return this.connection;
 		}catch(SQLException e){
 			throw e;
@@ -67,7 +66,6 @@ public class MySQLConnection implements AutoCloseable, IDBConnection {
 	public void close() throws SQLException {
 		if(this.connection != null){
 			if(!this.connection.isClosed()){
-				System.out.println("Closing connection...");
 				connection.close();
 			}
 		}

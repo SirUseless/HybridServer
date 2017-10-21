@@ -32,7 +32,7 @@ public class HtmlDAODB implements IDocumentDAO {
 
 	@Override
 	public void rawCreate(String uuid, String doc) throws Exception {
-		this.query = "INSERT INTO html (uuid, content) VALUES (?, ?)";
+		this.query = "INSERT INTO HTML (uuid, content) VALUES (?, ?)";
 		try(Connection connectionInstance = this.connection.connect()){
 			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query, Statement.RETURN_GENERATED_KEYS)){
 				stmt.setString(1, uuid);
@@ -48,7 +48,7 @@ public class HtmlDAODB implements IDocumentDAO {
 
 	@Override
 	public String read(String uuid) throws Exception {
-		this.query = "SELECT * FROM html WHERE uuid = ?";
+		this.query = "SELECT * FROM HTML WHERE uuid = ?";
 		try(Connection connectionInstance = this.connection.connect()){
 			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
 				stmt.setString(1, uuid);
@@ -57,6 +57,8 @@ public class HtmlDAODB implements IDocumentDAO {
 					while (result.next()) {
 						return result.getString("content");
 					}
+				}catch(SQLException e){
+					throw new SQLException();
 				}
 			}
 		}
@@ -71,7 +73,7 @@ public class HtmlDAODB implements IDocumentDAO {
 
 	@Override
 	public boolean delete(String uuid) throws Exception {
-		this.query = "DELETE FROM html WHERE uuid = ?";
+		this.query = "DELETE FROM HTML WHERE uuid = ?";
 		try(Connection connectionInstance = this.connection.connect()){
 			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
 				stmt.setString(1, uuid);
@@ -88,7 +90,7 @@ public class HtmlDAODB implements IDocumentDAO {
 	@Override
 	public Map<UUID, String> list() throws Exception {
 		Map<UUID, String> toRet = new LinkedHashMap<UUID, String>();
-		this.query = "SELECT * FROM html";
+		this.query = "SELECT * FROM HTML";
 		try(Connection connectionInstance = this.connection.connect()){
 			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
 				
