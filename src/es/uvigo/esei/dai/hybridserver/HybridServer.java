@@ -16,49 +16,60 @@ import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 
 
 public class HybridServer {
-	private static final int DEFAULT_SERVICE_PORT = 8888;
-	private static final int DEFAULT_MAX_SERVICES = 50;
+	
+	private static Configuration cfg;
 	private static int servicePort;
 	private ExecutorService threadPool;
-	//TODO non-static access to DAO
-	protected static IDocumentDAO documentDAO;
 	private Thread serverThread;
 	private boolean stop;
 	private int maxServices;
 	private String db_url;
 	private String db_user;
 	private String db_password;
+	private String webServiceURL;
 
 	public HybridServer() {
-		servicePort = DEFAULT_SERVICE_PORT;
-		this.maxServices = DEFAULT_MAX_SERVICES;
+		cfg = new Configuration();
 		
-		
-		//TODO cargar config por defecto
-		System.exit(0);
+		servicePort = cfg.getHttpPort();
+		this.maxServices = cfg.getNumClients();
+		this.db_password = cfg.getDbPassword();
+		this.db_url = cfg.getDbURL();
+		this.db_user = cfg.getDbUser();
+		this.webServiceURL = cfg.getWebServiceURL();
+		this.stop = false;
+		System.out.println("Server launched following default configuration.");
 	}
 	
 	public HybridServer(Configuration configuration){
-		//TODO implement
-		System.exit(0);
-	}
-
-	public HybridServer(Properties properties) {
-		this.maxServices = Integer.parseInt(properties.getProperty(PropertyNames.CLIENT_NUMBER.getName()).toString());
-		servicePort = Integer.parseInt(properties.getProperty(PropertyNames.PORT.getName()));
-		this.db_url = properties.getProperty(PropertyNames.DB_URL.getName());
-		this.db_user = properties.getProperty(PropertyNames.DB_USER.getName());
-		this.db_password = properties.getProperty(PropertyNames.DB_PASSWORD.getName());
+		cfg = configuration;
 		
-		try {
-			documentDAO = new HtmlDAODB(this.db_url, this.db_user, this.db_password);
-		} catch (ClassNotFoundException e) {
-			System.err.println("Could not find DB Driver. Exiting");
-			System.exit(-1);
-		}
-		
+		servicePort = cfg.getHttpPort();
+		this.maxServices = cfg.getNumClients();
+		this.db_password = cfg.getDbPassword();
+		this.db_url = cfg.getDbURL();
+		this.db_user = cfg.getDbUser();
+		this.webServiceURL = cfg.getWebServiceURL();
+		this.stop = false;
 		System.out.println("Server launched from config file.");
 	}
+
+//	public HybridServer(Properties properties) {
+//		this.maxServices = Integer.parseInt(properties.getProperty(PropertyNames.CLIENT_NUMBER.getName()).toString());
+//		servicePort = Integer.parseInt(properties.getProperty(PropertyNames.PORT.getName()));
+//		this.db_url = properties.getProperty(PropertyNames.DB_URL.getName());
+//		this.db_user = properties.getProperty(PropertyNames.DB_USER.getName());
+//		this.db_password = properties.getProperty(PropertyNames.DB_PASSWORD.getName());
+//		
+//		try {
+//			documentDAO = new HtmlDAODB(this.db_url, this.db_user, this.db_password);
+//		} catch (ClassNotFoundException e) {
+//			System.err.println("Could not find DB Driver. Exiting");
+//			System.exit(-1);
+//		}
+//		
+//		System.out.println("Server launched from config file.");
+//	}
 
 	public int getPort() {
 		return servicePort;

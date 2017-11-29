@@ -10,6 +10,7 @@ import java.util.UUID;
  *
  * Map implementation of IDocumentDAO
  */
+
 public class HtmlDAOMap implements IDocumentDAO{
 	private Map<UUID, String> htmlMappedDB = new LinkedHashMap<UUID, String>();
 		
