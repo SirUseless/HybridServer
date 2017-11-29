@@ -8,7 +8,7 @@ public class Launcher {
 	private static HybridServer server;
 	public static void main(String[] args) {
 		
-		if(args.length != 0){
+		if(args.length  != 0){
 				try(FileReader file_reader = new FileReader(args[0])){
 					Properties properties = new Properties();
 					properties.load(file_reader);
@@ -18,8 +18,8 @@ public class Launcher {
 					System.err.println("Could not create server from config file: " + e.getMessage());
 				}
 		}else{
-			System.out.println("No config file provided, starting server with default config.");
-			server = new HybridServer();
+			System.out.println("No config file provided. Aborting");
+			System.exit(-1);
 		}
 		
 		server.start();

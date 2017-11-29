@@ -33,13 +33,47 @@ public class ServiceThread implements Runnable {
 		//Default: internal server error
 		this.response.setStatus(HTTPResponseStatus.S500);
 	}
-
-	@Override
-	public void run() {
+	
+	public void run(){
 		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(
 				socket.getInputStream()))) {
 			try {
 				this.request = new HTTPRequest(buffer);
+				switch (this.request.getResourceName()) {
+				case "":
+					this.renderHomepage();
+					break;
+				case "html": 
+					this.manageHTML();
+					break;
+				case "xml": 
+					this.manageXML();
+					break;
+				case "xsd": 
+					this.manageXSD();
+					break;
+				case "xslt": 
+					this.manageXSLT();
+					break;
+				default:
+					//Unsupported resource type
+					response.setStatus(HTTPResponseStatus.S400);
+					this.renderError();
+					break;
+				}
+			} catch (HTTPParseException e) {
+				//Bad request
+				this.response.setStatus(HTTPResponseStatus.S400);
+				this.renderError();
+			} finally{
+				this.respond();
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public void manageHTML() {
 				switch (this.request.getMethod()) {
 				case GET:
 					this.prepareGet();
@@ -53,18 +87,26 @@ public class ServiceThread implements Runnable {
 				default:
 					//Unsupported
 					response.setStatus(HTTPResponseStatus.S405);
+					this.renderError();
 					break;
 				}
-			} catch (HTTPParseException e) {
-				//Bad request
-				this.response.setStatus(HTTPResponseStatus.S400);
-			} finally{
-				this.respond();
-			}
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-		}
 	}
+
+	private void manageXSLT() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void manageXSD() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void manageXML() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 	private void respond() {
 		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
@@ -78,7 +120,7 @@ public class ServiceThread implements Runnable {
 	private void prepareGet() {
 		Map<String, String> resources = this.request.getResourceParameters();
 		if(resources.isEmpty()){
-			this.renderHomepage();
+			this.renderList();
 		}else{
 			this.renderDocument();
 		}
@@ -98,10 +140,12 @@ public class ServiceThread implements Runnable {
 				e.printStackTrace();
 				System.out.println( e.getMessage());
 				//Default response is already S500
+				this.renderError();
 			}
 		}else{
 			//Bad request
 			this.response.setStatus(HTTPResponseStatus.S400);
+			this.renderError();
 		}
 	}
 
@@ -119,7 +163,7 @@ public class ServiceThread implements Runnable {
 	/**
 	 * Creates the html view of the main page/file list
 	 */
-	private void renderHomepage(){
+	private void renderList(){
 		this.response.setStatus(HTTPResponseStatus.S200);
 		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
 		String content = "<html><h1>Hybrid Server</h1><h2>Adrian Simon Reboredo</h2><h2>Josue Pato Valcarcel</h2>";
@@ -148,6 +192,25 @@ public class ServiceThread implements Runnable {
 		this.response.setContent(content);
 	}
 	
+	/* VIEWS */
+	/**
+	 * Creates the html view of the main page/file list
+	 */
+	private void renderHomepage(){
+		this.response.setStatus(HTTPResponseStatus.S200);
+		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
+		String content = "<html><h1>Hybrid Server</h1><h2>Adrian Simon Reboredo</h2><h2>Josue Pato Valcarcel</h2>";
+		content = content.concat("<h3>Database Connection Status:&nbsp;");
+		if(HybridServer.documentDAO.isAvaliable()){
+			content = content.concat("<span style=\"color: green;\">CONNECTED</span>");
+		}else{
+			content = content.concat("<span style=\"color: red;\">NOT CONNECTED</span>");
+		}
+		content = content.concat("</h3><ul>");
+		
+		this.response.setContent(content);
+	}
+	
 	/**
 	 * Creates the html view of any individual document
 	 */
@@ -168,12 +231,21 @@ public class ServiceThread implements Runnable {
 				this.response.setStatus(HTTPResponseStatus.S200);
 			}else{
 				this.response.setStatus(HTTPResponseStatus.S404);
+				this.renderError();
 			}			
 		} catch (Exception e) {
-			this.response.setStatus(HTTPResponseStatus.S400);
+			this.response.setStatus(HTTPResponseStatus.S404);
+			this.renderError();
 		}
 	}
 	
+	private void renderError(){
+		this.response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(), MIME.TEXT_HTML.getMime());
+		
+		String content = "<html><style>h1{color:red; padding: 300px; }</style><h1>"+ this.response.getStatus() + ": " + this.response.getStatus().getStatus() + "</h1></html>";
+		
+		this.response.setContent(content);		
+	}
 	
 	/* ACTIONS */
 	
@@ -183,9 +255,11 @@ public class ServiceThread implements Runnable {
 				this.response.setStatus(HTTPResponseStatus.S200);
 			}else{
 				this.response.setStatus(HTTPResponseStatus.S404);
+				this.renderError();
 			}
 		} catch (Exception e) {
 			this.response.setStatus(HTTPResponseStatus.S400);
+			this.renderError();
 			System.out.println("Delete failed");
 		}
 	}

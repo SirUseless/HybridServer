@@ -83,6 +83,7 @@ public class HTTPResponse {
 						+ content.length() + "\r\n");
 			}
 			writer.write("\r\n");
+			writer.flush();
 		}
 
 		// Content
