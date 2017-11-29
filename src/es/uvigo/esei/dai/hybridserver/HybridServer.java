@@ -51,25 +51,26 @@ public class HybridServer {
 		this.db_user = cfg.getDbUser();
 		this.webServiceURL = cfg.getWebServiceURL();
 		this.stop = false;
-		System.out.println("Server launched from config file.");
+		System.out.println("Server launched from XML file.");
 	}
 
-//	public HybridServer(Properties properties) {
-//		this.maxServices = Integer.parseInt(properties.getProperty(PropertyNames.CLIENT_NUMBER.getName()).toString());
-//		servicePort = Integer.parseInt(properties.getProperty(PropertyNames.PORT.getName()));
-//		this.db_url = properties.getProperty(PropertyNames.DB_URL.getName());
-//		this.db_user = properties.getProperty(PropertyNames.DB_USER.getName());
-//		this.db_password = properties.getProperty(PropertyNames.DB_PASSWORD.getName());
-//		
-//		try {
-//			documentDAO = new HtmlDAODB(this.db_url, this.db_user, this.db_password);
-//		} catch (ClassNotFoundException e) {
-//			System.err.println("Could not find DB Driver. Exiting");
-//			System.exit(-1);
-//		}
-//		
-//		System.out.println("Server launched from config file.");
-//	}
+	public HybridServer(Properties properties) {
+		this.maxServices = Integer.parseInt(properties.getProperty(PropertyNames.CLIENT_NUMBER.getName()).toString());
+		servicePort = Integer.parseInt(properties.getProperty(PropertyNames.PORT.getName()));
+		this.db_url = properties.getProperty(PropertyNames.DB_URL.getName());
+		this.db_user = properties.getProperty(PropertyNames.DB_USER.getName());
+		this.db_password = properties.getProperty(PropertyNames.DB_PASSWORD.getName());
+		
+		cfg = new Configuration();
+		
+		cfg.setNumClients(this.maxServices);
+		cfg.setHttpPort(servicePort);
+		cfg.setDbURL(this.db_url);
+		cfg.setDbUser(this.db_user);
+		cfg.setDbPassword(this.db_password);
+		
+		System.out.println("Server launched from Properties file.");
+	}
 
 	public int getPort() {
 		return servicePort;
@@ -87,7 +88,7 @@ public class HybridServer {
 						Socket socket = serverSocket.accept();
 							if (stop)
 								break;
-							executor.execute(new ServiceThread(socket));
+							executor.execute(new ServiceThread(socket, cfg));
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
