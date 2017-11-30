@@ -97,18 +97,28 @@ public class HTMLController implements Controller{
 	@Override
 	public HTTPResponse post(HTTPRequest request, HTTPResponse response) {
 		Map<String, String> resources = request.getResourceParameters();
-		System.out.println(this.htmlDAO.isAvaliable());
 
-		try {
-			String uuid = this.htmlDAO.create(resources.get("html"));
-			response.setContent("<a href=\"html?uuid=" + uuid + "\">" + uuid
-					+ "</a>");
-			// OK
-			response.setStatus(HTTPResponseStatus.S200);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println(e.getMessage());
-			response.setStatus(HTTPResponseStatus.S500);
+		if(resources.containsKey("html")){
+			try {
+				String uuid = this.htmlDAO.create(resources.get("html"));
+				response.setContent("<a href=\"html?uuid=" + uuid + "\">" + uuid
+						+ "</a>");
+				// OK
+				response.setStatus(HTTPResponseStatus.S200);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println(e.getMessage());
+				response.setStatus(HTTPResponseStatus.S500);
+				response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
+						MIME.TEXT_HTML.getMime());
+				String content = "<html><style>h1{color:red; padding: 300px; }</style><h1>"
+						+ response.getStatus()
+						+ ": "
+						+ response.getStatus().getStatus() + "</h1></html>";
+				response.setContent(content);
+			}
+		}else{
+			response.setStatus(HTTPResponseStatus.S400);
 			response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
 					MIME.TEXT_HTML.getMime());
 			String content = "<html><style>h1{color:red; padding: 300px; }</style><h1>"
