@@ -11,14 +11,15 @@ import es.uvigo.esei.dai.hybridserver.http.HTTPResponse;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponseStatus;
 import es.uvigo.esei.dai.hybridserver.http.MIME;
 
-public class HTMLController {
+public class HTMLController implements Controller{
 	private IDocumentDAO htmlDAO;
 
 	public HTMLController(String url, String user, String password)
 			throws ClassNotFoundException {
 		htmlDAO = new HtmlDAODB(url, user, password);
 	}
-
+	
+	@Override
 	public HTTPResponse list(HTTPRequest request, HTTPResponse response) {
 		response.setStatus(HTTPResponseStatus.S200);
 		response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
@@ -55,6 +56,7 @@ public class HTMLController {
 		return response;
 	}
 
+	@Override
 	public HTTPResponse get(HTTPRequest request, HTTPResponse response) {
 		response.setStatus(HTTPResponseStatus.S200);
 		response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
@@ -92,6 +94,7 @@ public class HTMLController {
 		return response;
 	}
 
+	@Override
 	public HTTPResponse post(HTTPRequest request, HTTPResponse response) {
 		Map<String, String> resources = request.getResourceParameters();
 		System.out.println(this.htmlDAO.isAvaliable());
@@ -118,6 +121,7 @@ public class HTMLController {
 		return response;
 	}
 
+	@Override
 	public HTTPResponse delete(HTTPRequest request, HTTPResponse response) {
 
 		if (!request.getResourceParameters().isEmpty()) {

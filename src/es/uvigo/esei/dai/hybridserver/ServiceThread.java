@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import es.uvigo.esei.dai.hybridserver.controller.HTMLController;
+import es.uvigo.esei.dai.hybridserver.controller.XMLController;
+import es.uvigo.esei.dai.hybridserver.controller.XSDController;
+import es.uvigo.esei.dai.hybridserver.controller.XSLTController;
 import es.uvigo.esei.dai.hybridserver.http.HTTPHeaders;
 import es.uvigo.esei.dai.hybridserver.http.HTTPParseException;
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
@@ -144,17 +147,101 @@ public class ServiceThread implements Runnable {
 	}
 
 	private void manageXSLT() {
-		// TODO Auto-generated method stub
+		try {
+			XSLTController xsltController = new XSLTController(
+					cfg.getDbURL(),
+					cfg.getDbUser(),
+					cfg.getDbPassword());
+			
+			switch (this.request.getMethod()) {
+			case GET:
+				if (this.request.getResourceParameters().isEmpty()) {
+					this.response = xsltController.list(this.request, this.response);
+				}else{
+					this.response = xsltController.get(this.request, this.response);
+				}
+				break;
+			case POST:
+				this.response = xsltController.post(this.request, this.response);
+				break;
+			case DELETE:
+				this.response = xsltController.delete(this.request, this.response);
+				break;
+			default:
+				//Unsupported
+				response.setStatus(HTTPResponseStatus.S405);
+				this.renderError("Unsupported method");
+				break;
+			}
+		} catch (ClassNotFoundException e) {
+			this.renderError("Could not create resource controller");
+		}
 		
 	}
 
 	private void manageXSD() {
-		// TODO Auto-generated method stub
+		try {
+			XSDController xsdController = new XSDController(
+					cfg.getDbURL(),
+					cfg.getDbUser(),
+					cfg.getDbPassword());
+			
+			switch (this.request.getMethod()) {
+			case GET:
+				if (this.request.getResourceParameters().isEmpty()) {
+					this.response = xsdController.list(this.request, this.response);
+				}else{
+					this.response = xsdController.get(this.request, this.response);
+				}
+				break;
+			case POST:
+				this.response = xsdController.post(this.request, this.response);
+				break;
+			case DELETE:
+				this.response = xsdController.delete(this.request, this.response);
+				break;
+			default:
+				//Unsupported
+				response.setStatus(HTTPResponseStatus.S405);
+				this.renderError("Unsupported method");
+				break;
+			}
+		} catch (ClassNotFoundException e) {
+			this.renderError("Could not create resource controller");
+		}
 		
 	}
 
 	private void manageXML() {
-		// TODO Auto-generated method stub
+		try {
+			XMLController xmlController = new XMLController(
+					cfg.getDbURL(),
+					cfg.getDbUser(),
+					cfg.getDbPassword());
+			
+			switch (this.request.getMethod()) {
+			case GET:
+				if (this.request.getResourceParameters().isEmpty()) {
+					this.response = xmlController.list(this.request, this.response);
+				}else{
+					this.response = xmlController.get(this.request, this.response);
+				}
+				break;
+			case POST:
+				this.response = xmlController.post(this.request, this.response);
+				break;
+			case DELETE:
+				this.response = xmlController.delete(this.request, this.response);
+				break;
+			default:
+				//Unsupported
+				response.setStatus(HTTPResponseStatus.S405);
+				this.renderError("Unsupported method");
+				break;
+			}
+		} catch (ClassNotFoundException e) {
+			this.renderError("Could not create resource controller");
+		}
 		
 	}
 
