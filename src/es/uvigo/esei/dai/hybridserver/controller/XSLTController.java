@@ -16,25 +16,25 @@ public class XSLTController implements Controller{
 	@Override
 	public HTTPResponse list(HTTPRequest request, HTTPResponse response) {
 		// TODO Auto-generated method stub
-		return null;
+		return response;
 	}
 
 	@Override
 	public HTTPResponse delete(HTTPRequest request, HTTPResponse response) {
 		// TODO Auto-generated method stub
-		return null;
+		return response;
 	}
 
 	@Override
 	public HTTPResponse post(HTTPRequest request, HTTPResponse response) {
 		// TODO Auto-generated method stub
-		return null;
+		return response;
 	}
 
 	@Override
 	public HTTPResponse get(HTTPRequest request, HTTPResponse response) {
 		// TODO Auto-generated method stub
-		return null;
+		return response;
 	}
 
 }

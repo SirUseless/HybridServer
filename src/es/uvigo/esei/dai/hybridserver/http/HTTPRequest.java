@@ -136,12 +136,12 @@ public class HTTPRequest {
 				String[] contentElements = this.content.split(Pattern
 						.quote("&"));
 				for (String contentParams : contentElements) {
-					String[] contentParam = contentParams.split("=");
+					String[] contentParam = contentParams.split("=",2);
 					this.resourceParameters.put(contentParam[0],
 							contentParam[1]);
 				}
 			} else if (this.content != null && this.content.contains("=")) {
-				String[] contentParam = content.split("=");
+				String[] contentParam = content.split("=",2);
 				this.resourceParameters.put(contentParam[0],
 						contentParam[1]);
 			}

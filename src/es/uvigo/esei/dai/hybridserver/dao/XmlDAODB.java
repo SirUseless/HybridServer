@@ -89,7 +89,6 @@ public class XmlDAODB implements IDocumentDAO {
 
 	@Override
 	public Map<UUID, String> list() throws Exception {
-		System.out.println("lsiting");
 		Map<UUID, String> toRet = new LinkedHashMap<UUID, String>();
 		this.query = "SELECT * FROM XML";
 		try(Connection connectionInstance = this.connection.connect()){
