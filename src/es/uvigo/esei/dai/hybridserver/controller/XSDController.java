@@ -98,8 +98,6 @@ public class XSDController implements Controller{
 	public HTTPResponse post(HTTPRequest request, HTTPResponse response) {
 		Map<String, String> resources = request.getResourceParameters();
 		
-		System.out.println(resources.toString());
-
 		if(resources.containsKey("xsd")){
 			try {
 				String uuid = this.xsdDAO.create(resources.get("xsd"));
