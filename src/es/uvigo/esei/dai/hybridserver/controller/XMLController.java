@@ -63,6 +63,10 @@ public class XMLController implements Controller{
 				MIME.APPLICATION_XML.getMime());
 		String uuid = request.getResourceParameters().get("uuid");
 
+		//TODO check xslt, comprobar con xsd y transformar
+		//XSDDao
+		//XSLTDAO
+		
 		try {
 			// Test if uuid is valid
 			UUID.fromString(uuid);

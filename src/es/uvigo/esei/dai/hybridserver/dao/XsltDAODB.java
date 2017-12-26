@@ -32,7 +32,7 @@ public class XsltDAODB implements IDocumentDAO {
 
 	@Override
 	public void rawCreate(String uuid, String doc) throws Exception {
-		this.query = "INSERT INTO XSLT (uuid, content) VALUES (?, ?)";
+		this.query = "INSERT INTO XSLT (uuid, content, xsd) VALUES (?, ?, '')";
 		try(Connection connectionInstance = this.connection.connect()){
 			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query, Statement.RETURN_GENERATED_KEYS)){
 				stmt.setString(1, uuid);
@@ -44,6 +44,35 @@ public class XsltDAODB implements IDocumentDAO {
 				}
 			}
 		}
+	}
+	
+	public void setXSD(String uuid, String xsdUuid) throws Exception{
+		this.query = "UPDATE XSLT SET xsd=? WHERE uuid=?";
+		try(Connection connectionInstance = this.connection.connect()){
+			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
+				stmt.setString(1, xsdUuid);
+				stmt.setString(2, uuid);
+				stmt.executeUpdate();
+			}
+		}
+	}
+	
+	public String getXSD(String uuid) throws Exception{
+		this.query = "SELECT * FROM XSLT WHERE uuid = ?";
+		try(Connection connectionInstance = this.connection.connect()){
+			try(PreparedStatement stmt = connectionInstance.prepareStatement(this.query)){
+				stmt.setString(1, uuid);
+				
+				try(ResultSet result = stmt.executeQuery()){
+					while (result.next()) {
+						return result.getString("sxd");
+					}
+				}catch(SQLException e){
+					throw new SQLException();
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
