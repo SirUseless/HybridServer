@@ -3,7 +3,6 @@ package es.uvigo.esei.dai.hybridserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,9 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.xml.ws.Endpoint;
 
-import es.uvigo.esei.dai.hybridserver.dao.HtmlDAODB;
-import es.uvigo.esei.dai.hybridserver.dao.HtmlDAOMap;
-import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 import es.uvigo.esei.dai.hybridserver.webservice.HSWebService;
 
 

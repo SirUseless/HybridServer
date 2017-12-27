@@ -50,10 +50,11 @@ public class XMLHelper {
 	
 	public static boolean checkWithXSDFromFile(String xmlPath, String xsdPath){
 		try {
-			Schema schema = factory.newSchema(new File(xmlPath));
+			Schema schema = factory.newSchema(new File(xsdPath));
 			Validator validator = schema.newValidator();
 			validator.validate(new StreamSource(new File(xmlPath)));
 		} catch (SAXException | IOException e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;
