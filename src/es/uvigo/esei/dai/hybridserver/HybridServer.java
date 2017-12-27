@@ -9,9 +9,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.ws.Endpoint;
+
 import es.uvigo.esei.dai.hybridserver.dao.HtmlDAODB;
 import es.uvigo.esei.dai.hybridserver.dao.HtmlDAOMap;
 import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
+import es.uvigo.esei.dai.hybridserver.webservice.HSWebService;
 
 
 
@@ -27,6 +30,7 @@ public class HybridServer {
 	private String db_user;
 	private String db_password;
 	private String webServiceURL;
+	private Endpoint endpoint;
 
 	public HybridServer() {
 		cfg = new Configuration();
@@ -77,6 +81,12 @@ public class HybridServer {
 	}
 
 	public void start() {
+		if(this.webServiceURL != null){
+			System.out.println("Publishing web service to " + webServiceURL);
+			endpoint = Endpoint.publish(webServiceURL, 
+									new HSWebService(db_url, db_user, db_password));
+		}		
+		
 		this.serverThread = new Thread() {
 			@Override
 			public void run() {
@@ -124,6 +134,10 @@ public class HybridServer {
 		  threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 		} catch (InterruptedException e) {
 		  e.printStackTrace();
+		}
+		
+		if(webServiceURL != null){
+			endpoint.stop();
 		}
 	}
 }
