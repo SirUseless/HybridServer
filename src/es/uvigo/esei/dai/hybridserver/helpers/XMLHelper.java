@@ -21,6 +21,9 @@ import javax.xml.validation.Validator;
 
 import org.xml.sax.SAXException;
 
+/*
+ * Helper class for common XML tasks, such as validation throught schemas and XSLT transformations
+ */
 
 public class XMLHelper {
 	

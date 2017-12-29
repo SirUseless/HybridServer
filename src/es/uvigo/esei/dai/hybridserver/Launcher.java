@@ -12,6 +12,7 @@ public class Launcher {
 			File cfgFile = new File(args[0]);
 			try {
 				cfg = XMLConfigurationLoader.load(cfgFile);
+				System.out.println("Launching server...");
 				server = new HybridServer(cfg);
 			} catch (Exception e) {
 				System.out.println("Couldn't load cfg: " + e.getMessage());
