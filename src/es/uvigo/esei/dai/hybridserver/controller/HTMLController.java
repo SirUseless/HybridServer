@@ -3,8 +3,6 @@ package es.uvigo.esei.dai.hybridserver.controller;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.swing.text.html.HTML;
-
 import es.uvigo.esei.dai.hybridserver.dao.HtmlDAODB;
 import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 import es.uvigo.esei.dai.hybridserver.helpers.HTMLHelper;
