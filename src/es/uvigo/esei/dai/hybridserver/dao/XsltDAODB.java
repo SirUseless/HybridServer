@@ -65,7 +65,7 @@ public class XsltDAODB implements IDocumentDAO {
 				
 				try(ResultSet result = stmt.executeQuery()){
 					while (result.next()) {
-						return result.getString("sxd");
+						return result.getString("xsd");
 					}
 				}catch(SQLException e){
 					throw new SQLException();
