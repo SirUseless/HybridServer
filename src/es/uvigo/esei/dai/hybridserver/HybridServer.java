@@ -10,14 +10,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.xml.ws.Endpoint;
 
-import es.uvigo.esei.dai.hybridserver.webservice.HSWebService;
 
 
 
 public class HybridServer {
 	
-	private static Configuration cfg;
-	private static int servicePort;
+	private Configuration cfg;
+	private int servicePort;
 	private ExecutorService threadPool;
 	private Thread serverThread;
 	private boolean stop;
@@ -80,7 +79,7 @@ public class HybridServer {
 		if(this.webServiceURL != null){
 			System.out.println("Publishing web service to " + webServiceURL);
 			endpoint = Endpoint.publish(webServiceURL, 
-									new HSWebService(db_url, db_user, db_password));
+									new HybridServerServiceImpl(db_url, db_user, db_password));
 		}		
 		
 		this.serverThread = new Thread() {

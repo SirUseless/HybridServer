@@ -1,11 +1,14 @@
 package es.uvigo.esei.dai.hybridserver.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import es.uvigo.esei.dai.hybridserver.Configuration;
 import es.uvigo.esei.dai.hybridserver.dao.HtmlDAODB;
 import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 import es.uvigo.esei.dai.hybridserver.helpers.HTMLHelper;
+import es.uvigo.esei.dai.hybridserver.helpers.WSUtils;
 import es.uvigo.esei.dai.hybridserver.http.HTTPHeaders;
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponse;
@@ -21,14 +24,16 @@ public class HTMLController implements Controller{
 	}
 	
 	@Override
-	public HTTPResponse list(HTTPRequest request, HTTPResponse response) {
+	public HTTPResponse list(HTTPRequest request, HTTPResponse response, Configuration cfg) {
 		response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
 				MIME.TEXT_HTML.getMime());
 	
 		try {
 			Map<UUID, String> list = this.htmlDAO.list();
+			Map<String, List<String>> serverList = WSUtils.listResource(cfg.getServers(), request.getResourceName());
+			
 			response.setStatus(HTTPResponseStatus.S200);
-			response = HTMLHelper.printList(response, request.getResourceName(), list);
+			response = HTMLHelper.printList(response, request.getResourceName(), list, serverList);
 		} catch (Exception e) {
 			response.setStatus(HTTPResponseStatus.S500);
 			response = HTMLHelper.printError(response, e.getMessage());
@@ -38,7 +43,7 @@ public class HTMLController implements Controller{
 	}
 
 	@Override
-	public HTTPResponse get(HTTPRequest request, HTTPResponse response) {
+	public HTTPResponse get(HTTPRequest request, HTTPResponse response, Configuration cfg) {
 		response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
 				MIME.TEXT_HTML.getMime());
 		
@@ -47,16 +52,22 @@ public class HTMLController implements Controller{
 		try {
 			// Test if uuid is valid
 			UUID.fromString(uuid);
-
+			//Local
 			if (this.htmlDAO.read(uuid) != null) {
 				response.setContent(this.htmlDAO.read(uuid));
 				response.setStatus(HTTPResponseStatus.S200);
-			} else {
+			//Remote
+			}else if(WSUtils.getResource(cfg.getServers(), request.getResourceName(), uuid) != null){
+				response.setContent(WSUtils.getResource(cfg.getServers(), request.getResourceName(), uuid));
+				response.setStatus(HTTPResponseStatus.S200);
+			}
+			else {
 				//not found, 404
 				response.setStatus(HTTPResponseStatus.S404);
 				response = HTMLHelper.printError(response);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			//UUID not valid, bad request
 			response.setStatus(HTTPResponseStatus.S400);
 			response = HTMLHelper.printError(response, "UUID format is not valid");

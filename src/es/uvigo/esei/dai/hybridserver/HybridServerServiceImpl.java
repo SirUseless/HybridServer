@@ -1,4 +1,4 @@
-package es.uvigo.esei.dai.hybridserver.webservice;
+package es.uvigo.esei.dai.hybridserver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +12,15 @@ import es.uvigo.esei.dai.hybridserver.dao.XmlDAODB;
 import es.uvigo.esei.dai.hybridserver.dao.XsdDAODB;
 import es.uvigo.esei.dai.hybridserver.dao.XsltDAODB;
 
-@WebService(endpointInterface = "es.uvigo.esei.dai.hybridserver.webservice.IHSWebService", serviceName = "HSWebService")
-public class HSWebService implements IHSWebService {
+@WebService(endpointInterface = "es.uvigo.esei.dai.hybridserver.HybridServerService", serviceName = "HybridServerService")
+public class HybridServerServiceImpl implements HybridServerService {
 
 	private HtmlDAODB htmlDAO;
 	private XmlDAODB xmlDAO;
 	private XsdDAODB xsdDAO;
 	private XsltDAODB xsltDAO;
 
-	public HSWebService(String url, String user, String password) {
+	public HybridServerServiceImpl(String url, String user, String password) {
 		super();
 		try {
 			this.htmlDAO = new HtmlDAODB(url, user, password);

@@ -123,9 +123,9 @@ public class ServiceThread implements Runnable {
 			switch (this.request.getMethod()) {
 			case GET:
 				if (this.request.getResourceParameters().isEmpty()) {
-					this.response = htmlController.list(this.request, this.response);
+					this.response = htmlController.list(this.request, this.response, cfg);
 				}else{
-					this.response = htmlController.get(this.request, this.response);
+					this.response = htmlController.get(this.request, this.response, cfg);
 				}
 				break;
 			case POST:
@@ -156,9 +156,9 @@ public class ServiceThread implements Runnable {
 			switch (this.request.getMethod()) {
 			case GET:
 				if (this.request.getResourceParameters().isEmpty()) {
-					this.response = xsltController.list(this.request, this.response);
+					this.response = xsltController.list(this.request, this.response, cfg);
 				}else{
-					this.response = xsltController.get(this.request, this.response);
+					this.response = xsltController.get(this.request, this.response, cfg);
 				}
 				break;
 			case POST:
@@ -189,9 +189,9 @@ public class ServiceThread implements Runnable {
 			switch (this.request.getMethod()) {
 			case GET:
 				if (this.request.getResourceParameters().isEmpty()) {
-					this.response = xsdController.list(this.request, this.response);
+					this.response = xsdController.list(this.request, this.response, cfg);
 				}else{
-					this.response = xsdController.get(this.request, this.response);
+					this.response = xsdController.get(this.request, this.response, cfg);
 				}
 				break;
 			case POST:
@@ -222,9 +222,9 @@ public class ServiceThread implements Runnable {
 			switch (this.request.getMethod()) {
 			case GET:
 				if (this.request.getResourceParameters().isEmpty()) {
-					this.response = xmlController.list(this.request, this.response);
+					this.response = xmlController.list(this.request, this.response, cfg);
 				}else{
-					this.response = xmlController.get(this.request, this.response);
+					this.response = xmlController.get(this.request, this.response, cfg);
 				}
 				break;
 			case POST:

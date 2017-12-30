@@ -11,7 +11,6 @@ import java.sql.SQLException;
  * Class defining an object which represents a MySQL Connection
  */
 
-//TODO use connection pooling instead of opening/closing a connection every time (open/close > realOpen/realClose)
 public class MySQLConnection implements AutoCloseable, IDBConnection {
 	private Connection connection;
 	private final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
@@ -21,9 +20,10 @@ public class MySQLConnection implements AutoCloseable, IDBConnection {
 	private String db_passwd;
 	
 	public MySQLConnection() throws ClassNotFoundException {
-		this.loadDriver();
 	}
 	
+	/*Only if mysql specific*/
+	@SuppressWarnings("unused")
 	private void loadDriver() throws ClassNotFoundException {
 		Class.forName(JDBC_DRIVER);
 	}

@@ -1,4 +1,4 @@
-package es.uvigo.esei.dai.hybridserver.webservice;
+package es.uvigo.esei.dai.hybridserver;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import javax.jws.WebService;
 
 
 @WebService
-public interface IHSWebService {
+public interface HybridServerService {
 
 	@WebMethod
 	public List<String> listHTML() throws Exception;

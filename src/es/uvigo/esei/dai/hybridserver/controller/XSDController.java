@@ -1,11 +1,14 @@
 package es.uvigo.esei.dai.hybridserver.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import es.uvigo.esei.dai.hybridserver.Configuration;
 import es.uvigo.esei.dai.hybridserver.dao.IDocumentDAO;
 import es.uvigo.esei.dai.hybridserver.dao.XsdDAODB;
 import es.uvigo.esei.dai.hybridserver.helpers.HTMLHelper;
+import es.uvigo.esei.dai.hybridserver.helpers.WSUtils;
 import es.uvigo.esei.dai.hybridserver.http.HTTPHeaders;
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 import es.uvigo.esei.dai.hybridserver.http.HTTPResponse;
@@ -21,13 +24,17 @@ public class XSDController implements Controller{
 	}
 
 	@Override
-	public HTTPResponse list(HTTPRequest request, HTTPResponse response) {
+	public HTTPResponse list(HTTPRequest request, HTTPResponse response, Configuration cfg) {
 		response.setStatus(HTTPResponseStatus.S200);
 		response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
 				MIME.TEXT_HTML.getMime());
 		
 		try {
-			response = HTMLHelper.printList(response, request.getResourceName(), this.xsdDAO.list());
+			Map<UUID, String> list = this.xsdDAO.list();
+			Map<String, List<String>> serverList = WSUtils.listResource(cfg.getServers(), request.getResourceName());
+			
+			response.setStatus(HTTPResponseStatus.S200);
+			response = HTMLHelper.printList(response, request.getResourceName(), list, serverList);
 		} catch (Exception e) {
 			response.setStatus(HTTPResponseStatus.S200);
 			response = HTMLHelper.printError(response, e.getMessage());
@@ -37,7 +44,7 @@ public class XSDController implements Controller{
 	}
 
 	@Override
-	public HTTPResponse get(HTTPRequest request, HTTPResponse response) {
+	public HTTPResponse get(HTTPRequest request, HTTPResponse response, Configuration cfg) {
 		response.setStatus(HTTPResponseStatus.S200);
 		response.putParameter(HTTPHeaders.CONTENT_TYPE.getHeader(),
 				MIME.APPLICATION_XML.getMime());
@@ -50,7 +57,12 @@ public class XSDController implements Controller{
 			if (this.xsdDAO.read(uuid) != null) {
 				response.setContent(this.xsdDAO.read(uuid));
 				response.setStatus(HTTPResponseStatus.S200);
-			} else {
+			}
+			else if(WSUtils.getResource(cfg.getServers(), request.getResourceName(), uuid) != null){
+				response.setContent(WSUtils.getResource(cfg.getServers(), request.getResourceName(), uuid));
+				response.setStatus(HTTPResponseStatus.S200);
+			}
+			else {
 				response.setStatus(HTTPResponseStatus.S404);
 				response = HTMLHelper.printError(response);
 			}
